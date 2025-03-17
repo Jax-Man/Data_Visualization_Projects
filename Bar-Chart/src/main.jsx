@@ -5,9 +5,11 @@ import { Provider } from 'react-redux';
 import './index.css';
 import App from './App.jsx';
 
+import dataReducer from './features/data.jsx'
+
 const store = configureStore({
   reducer: {
-    
+    data: dataReducer
   }
   });
 

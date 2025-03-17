@@ -1,0 +1,115 @@
+import React, { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import * as d3 from 'd3';
+import { fetchData } from '../features/data';
+
+function DataSpread() {
+    const dispatch = useDispatch();
+    const data = useSelector((state) => state.data.value);
+    const gotData = useSelector((state) => state.data.loaded);
+    const [isSvgAppended, setIsSvgAppended] = useState(false);
+
+    
+    
+    useEffect(() => {
+      dispatch(fetchData());
+    }, [])
+    
+    
+    useEffect(() => {
+      if (gotData && !isSvgAppended) {
+        
+        const gdpData = data.data.map((e) => e[1]); 
+        const yearsData = data.data.map((e) => new Date(e[0]))
+        const dateMap = yearsData.map((e) => [Number.parseInt(e[0]), Number.parseInt(e[1])])
+        
+        // Set Month To 1-4 based on value and grab unique years
+
+        let i = 0; 
+        const uniqueYears = [];
+
+        dateMap.forEach(element => {
+          if(!uniqueYears.includes(element[0])) { 
+              uniqueYears[i] = element[0]
+              i++ };
+          if (element[1] === 1) { 
+            element[1] = 1 
+          } else if (element[1] === 4) { 
+              element[1] = 2 
+          } else if (element[1] === 7) { 
+              element[1] = 3 
+          } else if (element[1] === 10) { 
+              element[1] = 4 
+          }
+
+        });
+        console.log(uniqueYears, dateMap)
+
+        const w = 1000;
+        const h = 500;
+        const dataWidth = w / 275;
+        const scale = 3;
+
+        const padding = 50;
+
+        
+       
+        var xMax = new Date(d3.max(yearsData));
+        xMax.setMonth(xMax.getMonth() + 3);
+        
+
+        const xScale = d3.scaleTime()
+        .domain([d3.min(yearsData), xMax])
+        .range([padding, w - padding])
+        
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(gdpData)])
+            .range([h - padding, padding]);
+        
+          // Making data Array to sort years
+        
+        const xAxis = d3.axisBottom(xScale);
+
+        const yAxis = d3.axisLeft(yScale);
+
+        const svg = d3.select('#data-wrapper')
+        .append('svg')
+        .attr('width', w)
+        .attr('height', h)
+        .style('background-color', 'red');
+
+        svg.selectAll('rect')
+            .data(data.data)
+            .enter()
+            .append('rect')
+            .attr('x', (d, i) => xScale(yearsData[i]))
+            .attr('y', (d) => yScale(d[1]))
+            .attr('width', dataWidth)
+            .attr('height', (d) => h - padding - yScale(d[1]))
+            .attr('fill', 'navy')
+            
+        svg.append("g")
+            .attr('transform', 'translate(0, ' + (h - padding) + ')')
+            .call(xAxis)
+            .attr('id', 'x-axis');
+
+        svg.append('g')
+            .attr('transform', `translate(${padding}, 0)`)
+            .call(yAxis)
+            .attr('id', 'y-axis');
+
+       setIsSvgAppended(true);
+    }
+      
+    }, [data])
+
+
+  return (
+
+    <div id='data-wrapper'></div>
+    
+  )
+}
+
+export default DataSpread
