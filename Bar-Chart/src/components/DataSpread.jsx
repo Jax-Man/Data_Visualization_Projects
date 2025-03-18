@@ -25,13 +25,7 @@ function DataSpread() {
         
         // Set Month To 1-4 based on value and grab unique years
 
-        let i = 0; 
-        const uniqueYears = [];
-
         dateMap.forEach(element => {
-          if(!uniqueYears.includes(element[0])) { 
-              uniqueYears[i] = element[0]
-              i++ };
           if (element[1] === 1) { 
             element[1] = 1 
           } else if (element[1] === 4) { 
@@ -43,7 +37,6 @@ function DataSpread() {
           }
 
         });
-        console.log(uniqueYears, dateMap)
 
         const w = 1000;
         const h = 500;
@@ -51,8 +44,6 @@ function DataSpread() {
         const scale = 3;
 
         const padding = 50;
-
-        
        
         var xMax = new Date(d3.max(yearsData));
         xMax.setMonth(xMax.getMonth() + 3);
@@ -87,7 +78,10 @@ function DataSpread() {
             .attr('y', (d) => yScale(d[1]))
             .attr('width', dataWidth)
             .attr('height', (d) => h - padding - yScale(d[1]))
+            .attr('data-date', (d, i) => data.data[i][0])
+            .attr('data-gdp', (d, i) => data.data[i][1])
             .attr('fill', 'navy')
+            .attr('class', 'bar')
             
         svg.append("g")
             .attr('transform', 'translate(0, ' + (h - padding) + ')')
@@ -98,6 +92,9 @@ function DataSpread() {
             .attr('transform', `translate(${padding}, 0)`)
             .call(yAxis)
             .attr('id', 'y-axis');
+        
+        svg.selectAll('line')
+          .attr('class', 'tick')
 
        setIsSvgAppended(true);
     }
@@ -106,9 +103,10 @@ function DataSpread() {
 
 
   return (
-
-    <div id='data-wrapper'></div>
-    
+    <div className='d-flex flex-column-reverse'>
+      <div className='container-fluid text-center' id='title'>title test</div>
+      <div id='data-wrapper'></div>
+    </div>
   )
 }
 
