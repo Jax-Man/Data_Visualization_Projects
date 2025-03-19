@@ -10,19 +10,32 @@
   <body class="container-fluid d-flex justify-content-center">
     
     <div id="root" class="container d-flex flex-column justify-content-center align-items-center">
-      <div id="title" class="justify-self-end">Quarterly Federal Reserve Economic GDP</div>
+      <div class="justify-self-end fs-2">Doping Allegations:</div>
+      <div id="title" class="justify-self-end">The 35 fastest times up Alpe d'Huez</div>
       <div id="graph-wrapper"></div>
-      <div id="y-axis-title">GDP Quarterly Data From 1947-2015</div>
     </div>
     <script type="module">
       import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
       
-      const data = await d3.json('https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json');
+      const data = await d3.json('https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/cyclist-data.json');
       function formatData() {
-        const gdpData = data.data.map((e) => e[1]); 
-        const yearsData = data.data.map((e) => new Date(e[0]))
-        const dateMap = yearsData.map((e) => [Number.parseInt(e[0]), Number.parseInt(e[1])])
-        console.log(data);
+        
+        //Setting min max to date for formatting and ease of use
+        const xFormatYear = d3.timeFormat('%Y')
+        const xArray = data.map((e) => {
+          let date = new Date(1970, 0, 1, 0, 0, 0);
+          date.setFullYear(e.Year);
+          return date;
+        });
+        
+        //Set up Yarray for axis
+        const runnersTimeFormat = d3.timeFormat("%M:%S");
+        const yArray = data.map((d) => {
+          let parsedTime = d.Time.split(':');
+          return d.Time = new Date(1970, 0, 1, 0, parsedTime[0], parsedTime[1]);
+        });
+        
+
         // Declare the chart dimensions and margins.
         const width = 1200;
         const height = 600;
@@ -33,34 +46,44 @@
         const marginLeft = 160;
         const moneyRegex = /\d(?=(\d{3})+\.)/;
 
-        //make overlay
+       
 
         
 
-        //make tooltip
+       
   // Declare the x (horizontal position) scale.
-        const xMaxMonth = new Date(d3.max(yearsData));
 
-        xMaxMonth.setMonth(xMaxMonth.getMonth() + 3);
+        const xMin = new Date(d3.min(xArray));
+        const xMax = new Date(d3.max(xArray));
+        const xMinValue = xMin.getFullYear();
+        const xMaxValue = xMax.getFullYear();
+        xMin.setFullYear(xMinValue - 1);
+        xMax.setFullYear(xMaxValue + 1);
 
-        const x = d3.scaleUtc()
-            .domain([d3.min(yearsData), xMaxMonth])
-            .range([marginLeft, width - marginRight]);
-
+        const x = d3.scaleTime()
+          .domain([xMin, xMax])
+          .range([marginLeft, width - marginRight]);
+        
+        console.log(xMin, xMax)
+        const xAxis = d3.axisBottom(x)
   // Declare the y (vertical position) scale.
-        const y = d3.scaleLinear()
-            .domain([0, d3.max(gdpData)])
-            .range([height - marginBottom, marginTop]);
+        const y = d3.scaleLinear().range([marginTop, height - marginBottom])
+                  .domain(d3.extent(yArray))
+
+
+        const yAxis = d3.axisLeft(y).tickFormat(runnersTimeFormat);
 
   // Create the SVG container.
         const svg = d3.select("#graph-wrapper").append("svg")
-            .attr("width", width)
-            .attr("height", height);
+            .attr("width", width + marginLeft + marginRight)
+            .attr("height", height + marginTop + marginBottom);
 
-        const overlay = d3.select('svg')
-            .append('rect')
-            .attr('class', 'overlay')
-            .style('opacity', 0)
+        const legend = d3.select('svg')
+            .append('g')
+            .attr('id', 'legend')
+            .attr('width', 200)
+            .attr('height', 200)
+            .attr('x', width - marginRight)
 
         const tooltip = d3.select('svg')
             .append('g')
@@ -71,96 +94,29 @@
         svg.append("g")
             .attr("transform", `translate(0,${height - marginBottom})`)
             .attr('id', 'x-axis')
-            .call(d3.axisBottom(x));
+            .call(xAxis);
 
   // Add the y-axis.
         svg.append("g")
             .attr("transform", `translate(${marginLeft},0)`)
             .attr('id', 'y-axis')
-            .call(d3.axisLeft(y));
+            .call(yAxis);
 
   // Append the SVG data.
-        svg.selectAll('rect')
-          .filter()
-          .data(data.data)
-          .enter()
-          .append('rect')
-          .attr('x', (_, i) => x(yearsData[i]))
-          .attr('y', (d) => y(d[1]))
-          .attr('width', dataWidth)
-          .attr('height', (d) => height - marginBottom - y(d[1]))
-          .attr('data-date', (_, i) => data.data[i][0])
-          .attr('data-gdp', (_, i) => data.data[i][1])
-          .attr('fill', 'navy')
-          .attr('class', 'bar')
-          .attr('index', (_, i) => i)
-          .on('mouseover', (event, d) => {
+
+        svg.selectAll('circle')
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr('class', 'dot')
+        .attr('cx', (_, i) => x(xArray[i]))
+        .attr('cy', (_, i) => y(yArray[i]))
+        .attr('r', 5)
+        .attr('data-xvalue', (_, i) => data[i].Year)
+        .attr('data-yvalue', (_, i) => data[i].Time)
+        .attr('fill', 'navy')
             
-
-            const [x, y] = d3.pointer(event);
-
-            const selected = d3.select(event.target)
-            const index = selected.attr('index')
-            
-            overlay
-              .transition()
-              .duration(20)
-              .style('position', 'absolute')
-              .attr('height', selected.attr('height') + 'px')
-              .attr('width', dataWidth + 'px')
-              .attr('x', selected.attr('x'))
-              .attr('y', selected.attr('y'))
-              .attr('fill', 'red')
-              .style('opacity', 0.9);
-
-              overlay.raise();
-
-             tooltip.transition().duration(200)
-              .style('opacity', 0.9)
-              .attr('height', '50px')
-              .attr('width', '200px')
-              .attr('x', x - 50)
-              .attr('y', y - 100)
-              .attr('data-date', data.data[index][0])
-              .attr('data-gdp', data.data[index][1])
-             
-             tooltip.raise();
-
-            tooltip.selectAll('rect').remove()
-
-            tooltip.selectAll('text').remove()
-
-             tooltip.append('rect')
-             .attr("style", "outline: thin solid red;") 
-             .attr('fill', 'white')
-             .attr('height', '50px')
-             .attr('width', '200px')
-             .attr('x', x - 50)
-             .attr('y', y - 100);
-
-
-             tooltip.append('text').text( 'date of quarter: '+data.data[index][0])
-             .attr('x', x - 47)
-             .attr('y', y - 80)
-
-             tooltip.append('text').text('gdp: ' + data.data[index][1].toFixed(1) + ' Billion')
-             .attr('x', x - 47)
-             .attr('y', y - 60)
-
-             overlay.on('mouseout', () => {
-              overlay
-              .transition()
-              .duration(20)
-              .style('opacity', 0);
-              
-              tooltip.style('opacity', 0);
-            });
-          });
-
-          svg.on('mouseleave', () => {
-  tooltip.transition().duration(200).style('opacity', 0);
-});
-    }
+      }
       if (document.readyState !== 'loading') {
         formatData();
       } else { document.addEventListener("DOMContentLoaded", () => formatData()) }
