@@ -1,0 +1,17 @@
+html {
+  min-height: 100vh;
+}
+
+body, div#root {
+  height: 100vh;
+}
+
+div#root {
+  position: absolute;
+}
+
+div#x-axis-title {
+  transform: rotate(-90deg) translate(0, 25px);
+  
+}
+
