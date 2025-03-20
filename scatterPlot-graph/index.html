@@ -37,8 +37,8 @@
         
 
         // Declare the chart dimensions and margins.
-        const width = 1200;
-        const height = 600;
+        const width = 1000;
+        const height = 500;
         const dataWidth = width / 275;
         const marginTop = 80;
         const marginRight = 160;
@@ -77,14 +77,49 @@
         const svg = d3.select("#graph-wrapper").append("svg")
             .attr("width", width + marginLeft + marginRight)
             .attr("height", height + marginTop + marginBottom);
-
+  //creat legend on side
         const legend = d3.select('svg')
             .append('g')
             .attr('id', 'legend')
-            .attr('width', 200)
-            .attr('height', 200)
-            .attr('x', width - marginRight)
+            
+          //make box
+            legend.append('rect')
+              .attr('width', 250)
+              .attr('height', 100)
+              .attr('x', width + marginRight - 180)
+              .attr('y', height / 2 - 15)
+              .attr('style', 'outline: thick solid orange')
+              .attr('fill', 'white');
+          //make identifiers
+            legend.append('rect')
+            .attr('width', 20)
+              .attr('height', 20)
+              .attr('x', width + marginRight - 160)
+              .attr('y', height / 2)
+              .attr('style', 'outline: thick solid black')
+              .attr('fill', 'green');
 
+              legend.append('rect')
+            .attr('width', 20)
+              .attr('height', 20)
+              .attr('x', width + marginRight - 160)
+              .attr('y', height / 2 + 50)
+              .attr('style', 'outline: thick solid black')
+              .attr('fill', 'red')
+
+              legend.append('text')
+              .text('No doping allegations')
+              .attr('x', width + marginRight - 130)
+              .attr('y', height / 2 + 15)
+              
+              legend.append('text')
+              .text('Doping allegations')
+              .attr('height', 20)
+              .attr('x', width + marginRight - 130)
+              .attr('y', height / 2 + 65)
+              
+
+  //create tooltip on hover
         const tooltip = d3.select('svg')
             .append('g')
             .attr('id', 'tooltip')
@@ -95,7 +130,11 @@
             .attr("transform", `translate(0,${height - marginBottom})`)
             .attr('id', 'x-axis')
             .call(xAxis);
+        //and the X label
 
+        svg.append('text').text('Time in Minutes').attr('x', (height / 2 + 120) * -1).attr('y', 90).style('transform', 'rotate(-90deg)').style('font-size', '2rem');
+
+        svg.append('text').text('Year of Recorded Time').attr('x', width / 2 - marginRight).attr('y', height + 40).style('font-size', '2rem')
   // Add the y-axis.
         svg.append("g")
             .attr("transform", `translate(${marginLeft},0)`)
@@ -111,11 +150,70 @@
         .attr('class', 'dot')
         .attr('cx', (_, i) => x(xArray[i]))
         .attr('cy', (_, i) => y(yArray[i]))
-        .attr('r', 5)
+        .attr('r', 10)
         .attr('data-xvalue', (_, i) => data[i].Year)
         .attr('data-yvalue', (_, i) => data[i].Time)
-        .attr('fill', 'navy')
+        .attr('fill', (_, i) => {
+          if (data[i].Doping === "") {return "green"}
+          else { return "red"}
+        })
+        
+        svg.selectAll('circle')
+        .on('mouseover', (event, d) => {
             
+          const outlineColor = d.Doping === "" ? "green" : "red"
+          const [x, y] = d3.pointer(event);
+
+          const selected = d3.select(event.target);
+          const i = selected.attr('index');
+          console.log(selected, d)
+          
+          tooltip.raise();
+
+          tooltip.selectAll('rect').remove();
+
+          tooltip.selectAll('text').remove();
+
+
+          tooltip
+          .transition()
+          .duration(200)
+          .style('opacity', 0.9)
+          .attr('data-year', d.Year)
+          
+          tooltip.append('rect')
+            .attr('style', `outline: thin solid ${outlineColor}`)
+            .attr('fill', 'white')
+            .attr('height', '100px')
+            .attr('width', `${d.Doping ? '570' : '300'}`)
+            .attr('x', x + 15)
+            .attr('y', y - 20);
+
+          tooltip.append('text')
+          .text(`${d.Name} Skied in ${d.Year}`)
+          .attr('x', x + 25)
+          .attr('y', y );
+
+          tooltip.append('text')
+          .text(`Time: ${runnersTimeFormat(d.Time)} minutes`)
+          .attr('x', x + 25)
+          .attr('y', y + 25);
+
+          tooltip.append('text')
+          .text(`Allegations: ${d.Doping ? d.Doping : "None :)"}`)
+          
+          .attr('x', x + 25)
+          .attr('y', y + 45);
+        })
+        .on('mouseout', () => {
+          tooltip.transition().duration(200).style('opacity', 0)
+        
+          tooltip.lower();
+        })
+        
+        svg.on('mouseleave', () => {
+  tooltip.transition().duration(200).style('opacity', 0);
+});
       }
       if (document.readyState !== 'loading') {
         formatData();
