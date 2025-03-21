@@ -1,121 +1,109 @@
-import * as d3 from 'd3';
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
-const data = [];
-
-/*async function getData() {
-  const url = "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json"
-
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Uh-Oh this error happened: ${response.status}`);
-    }
-
-    const json = await response.json();
-    console.log(json);
-  } catch (error) {
-    console.log("uh-oh", error.message)
-  };
-  return 
-}*/
-
-
-document.addEventListener ("DOMContentLoaded", () => {
-    
-    
-    
-    const [isSvgAppended, setIsSvgAppended] = useState(false);
-
-    
-    
+const data = await d3.csv('https://raw.githubusercontent.com/Jax-Man/fluffy-memory/refs/heads/main/csv-drug-store/climate_change.csv');
+function formatData() {
   
-    
-    
-      if (gotData && !isSvgAppended) {
-        
-        const gdpData = data.data.map((e) => e[1]); 
-        const yearsData = data.data.map((e) => new Date(e[0]))
-        const dateMap = yearsData.map((e) => [Number.parseInt(e[0]), Number.parseInt(e[1])])
-        
-        // Set Month To 1-4 based on value and grab unique years
-
-        dateMap.forEach(element => {
-          if (element[1] === 1) { 
-            element[1] = 1 
-          } else if (element[1] === 4) { 
-              element[1] = 2 
-          } else if (element[1] === 7) { 
-              element[1] = 3 
-          } else if (element[1] === 10) { 
-              element[1] = 4 
-          }
-
-        });
-
-        const w = 1000;
-        const h = 500;
-        const dataWidth = w / 275;
-        const scale = 3;
-
-        const padding = 50;
-       
-        var xMax = new Date(d3.max(yearsData));
-        xMax.setMonth(xMax.getMonth() + 3);
-        
-
-        const xScale = d3.scaleTime()
-        .domain([d3.min(yearsData), xMax])
-        .range([padding, w - padding])
-        
-
-        const yScale = d3.scaleLinear()
-            .domain([0, d3.max(gdpData)])
-            .range([h - padding, padding]);
-        
-          // Making data Array to sort years
-        
-        const xAxis = d3.axisBottom(xScale);
-
-        const yAxis = d3.axisLeft(yScale);
-
-        const svg = d3.select('#data-wrapper')
-        .append('svg')
-        .attr('width', w)
-        .attr('height', h)
-        .style('background-color', 'red');
-
-        svg.selectAll('rect')
-            .data(data.data)
-            .enter()
-            .append('rect')
-            .attr('x', (d, i) => xScale(yearsData[i]))
-            .attr('y', (d) => yScale(d[1]))
-            .attr('width', dataWidth)
-            .attr('height', (d) => h - padding - yScale(d[1]))
-            .attr('data-date', (d, i) => data.data[i][0])
-            .attr('data-gdp', (d, i) => data.data[i][1])
-            .attr('fill', 'navy')
-            .attr('class', 'bar')
-            
-        svg.append("g")
-            .attr('transform', 'translate(0, ' + (h - padding) + ')')
-            .call(xAxis)
-            .attr('id', 'x-axis');
-
-        svg.append('g')
-            .attr('transform', `translate(${padding}, 0)`)
-            .call(yAxis)
-            .attr('id', 'y-axis');
-        
-        svg.selectAll('line')
-          .attr('class', 'tick')
-
-       setIsSvgAppended(true);
-    }
+  //Setting min max to date for formatting and ease of use
   
+  const colorArray = data.map(e => parseFloat(e.Temp));
+  const xArray = data.map((e) => {
+    let date = new Date(1970, 0, 1, 0, 0, 0);
+    date.setFullYear(e.Year);
+    return date;
+  });
+  //Set up Yarray for axis
+ console.log(xArray)
+  const yArray = ['January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'];
+  
+
+  // Declare the chart dimensions and margins.
+  const width = 1000;
+  const height = 500;
+  const dataWidth = width / 275;
+  const marginTop = 80;
+  const marginRight = 160;
+  const marginBottom = 30;
+  const marginLeft = 160;
+  
+
+ 
+
+  
+
+ 
+// Declare the x (horizontal position) scale.
+const xMin = new Date(d3.min(xArray));
+const xMax = new Date(d3.max(xArray));
+const xMinValue = xMin.getFullYear();
+const xMaxValue = xMax.getFullYear();
+xMin.setFullYear(xMinValue - 1);
+xMax.setFullYear(xMaxValue + 1);
+  const x = d3.scaleTime().range([marginLeft, width - marginRight])
+  .domain([xMin, xMax]);
+  
+  
+  const xAxis = d3.axisBottom(x);
+// Declare the y (vertical position) scale.
+  const y = d3.scaleBand().range([marginTop, height - marginBottom])
+          .domain(yArray);
+
+  const yAxis = d3.axisLeft(y);
+
+// Create the SVG container.
+  const svg = d3.select("#graph-wrapper").append("svg")
+      .attr("width", width + marginLeft + marginRight)
+      .attr("height", height + marginTop + marginBottom);
+//creat legend on side
+  const legend = d3.select('svg')
+      .append('g')
+      .attr('id', 'legend')
       
-    
+    //make box
+      legend.append('rect')
+        .attr('width', 250)
+        .attr('height', 100)
+        .style('opacity', 0)
+        
+    //make identifiers
 
+//create tooltip on hover
+  const tooltip = d3.select('svg')
+      .append('g')
+      .attr('id', 'tooltip')
+      .attr('class', 'overlay')
+      .style('opacity', 0)
+// Add the x-axis.
+  svg.append("g")
+      .attr("transform", `translate(0,${height - marginBottom})`)
+      .attr('id', 'x-axis')
+      .call(xAxis);
+  //and the X label
 
+  svg.append('text').text('Time in Minutes').attr('x', (height / 2 + 120) * -1).attr('y', 90).style('transform', 'rotate(-90deg)').style('font-size', '2rem');
+
+  svg.append('text').text('Year of Recorded Time').attr('x', width / 2 - marginRight).attr('y', height + 40).style('font-size', '2rem')
+// Add the y-axis.
+  svg.append("g")
+      .attr("transform", `translate(${marginLeft},0)`)
+      .attr('id', 'y-axis')
+      .call(yAxis);
+
+// Append the SVG data.
+
+  svg.selectAll()
   
-})
+}
+if (document.readyState !== 'loading') {
+  formatData();
+} else { document.addEventListener("DOMContentLoaded", () => formatData()) }

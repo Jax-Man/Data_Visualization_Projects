@@ -14,7 +14,221 @@
       <div id="title" class="justify-self-end">The 35 fastest times up Alpe d'Huez</div>
       <div id="graph-wrapper"></div>
     </div>
-    <script type="module" src="./index.js"></script>
+    <script type="module">
+      import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+      
+      const data = await d3.json('https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/cyclist-data.json');
+      function formatData() {
+        
+        //Setting min max to date for formatting and ease of use
+        
+        const xArray = data.map((e) => {
+          let date = new Date(1970, 0, 1, 0, 0, 0);
+          date.setFullYear(e.Year);
+          return date;
+        });
+        
+        //Set up Yarray for axis
+        const runnersTimeFormat = d3.timeFormat("%M:%S");
+        const yArray = data.map((d) => {
+          let parsedTime = d.Time.split(':');
+          return d.Time = new Date(1970, 0, 1, 0, parsedTime[0], parsedTime[1]);
+        });
+        
+
+        // Declare the chart dimensions and margins.
+        const width = 1000;
+        const height = 500;
+        const dataWidth = width / 275;
+        const marginTop = 80;
+        const marginRight = 160;
+        const marginBottom = 30;
+        const marginLeft = 160;
+        const baseRadius = 10;
+
+       
+
+        
+
+       
+  // Declare the x (horizontal position) scale.
+
+        const xMin = new Date(d3.min(xArray));
+        const xMax = new Date(d3.max(xArray));
+        const xMinValue = xMin.getFullYear();
+        const xMaxValue = xMax.getFullYear();
+        xMin.setFullYear(xMinValue - 1);
+        xMax.setFullYear(xMaxValue + 1);
+
+        const x = d3.scaleTime()
+          .domain([xMin, xMax])
+          .range([marginLeft, width - marginRight]);
+        
+        console.log(xMin, xMax)
+        const xAxis = d3.axisBottom(x)
+  // Declare the y (vertical position) scale.
+        const y = d3.scaleLinear().range([marginTop, height - marginBottom])
+                  .domain(d3.extent(yArray))
+
+
+        const yAxis = d3.axisLeft(y).tickFormat(runnersTimeFormat);
+
+  // Create the SVG container.
+        const svg = d3.select("#graph-wrapper").append("svg")
+            .attr("width", width + marginLeft + marginRight)
+            .attr("height", height + marginTop + marginBottom);
+  //creat legend on side
+        const legend = d3.select('svg')
+            .append('g')
+            .attr('id', 'legend')
+            
+          //make box
+            legend.append('rect')
+              .attr('width', 250)
+              .attr('height', 100)
+              .attr('x', width + marginRight - 180)
+              .attr('y', height / 2 - 15)
+              .attr('style', 'outline: thick solid orange')
+              .attr('fill', 'white');
+          //make identifiers
+            legend.append('rect')
+            .attr('width', 20)
+              .attr('height', 20)
+              .attr('x', width + marginRight - 160)
+              .attr('y', height / 2)
+              .attr('style', 'outline: thick solid black')
+              .attr('fill', 'green');
+
+              legend.append('rect')
+            .attr('width', 20)
+              .attr('height', 20)
+              .attr('x', width + marginRight - 160)
+              .attr('y', height / 2 + 50)
+              .attr('style', 'outline: thick solid black')
+              .attr('fill', 'red')
+
+              legend.append('text')
+              .text('No doping allegations')
+              .attr('x', width + marginRight - 130)
+              .attr('y', height / 2 + 15)
+              
+              legend.append('text')
+              .text('Doping allegations')
+              .attr('height', 20)
+              .attr('x', width + marginRight - 130)
+              .attr('y', height / 2 + 65)
+              
+
+  //create tooltip on hover
+        const tooltip = d3.select('svg')
+            .append('g')
+            .attr('id', 'tooltip')
+            .attr('class', 'overlay')
+            .style('opacity', 0)
+  // Add the x-axis.
+        svg.append("g")
+            .attr("transform", `translate(0,${height - marginBottom})`)
+            .attr('id', 'x-axis')
+            .call(xAxis);
+        //and the X label
+
+        svg.append('text').text('Time in Minutes').attr('x', (height / 2 + 120) * -1).attr('y', 90).style('transform', 'rotate(-90deg)').style('font-size', '2rem');
+
+        svg.append('text').text('Year of Recorded Time').attr('x', width / 2 - marginRight).attr('y', height + 40).style('font-size', '2rem')
+  // Add the y-axis.
+        svg.append("g")
+            .attr("transform", `translate(${marginLeft},0)`)
+            .attr('id', 'y-axis')
+            .call(yAxis);
+
+  // Append the SVG data.
+
+        svg.selectAll('circle')
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr('class', 'dot')
+        .attr('cx', (_, i) => x(xArray[i]))
+        .attr('cy', (_, i) => y(yArray[i]))
+        .attr('r', baseRadius)
+        .attr('data-xvalue', (_, i) => data[i].Year)
+        .attr('data-yvalue', (_, i) => data[i].Time)
+        .attr('fill', (_, i) => {
+          if (data[i].Doping === "") {return "green"}
+          else { return "red"}
+        })
+        
+        svg.selectAll('circle')
+        .on('mouseover', (event, d) => {
+            
+          const outlineColor = d.Doping === "" ? "green" : "red"
+          const [x, y] = d3.pointer(event);
+
+          const selected = d3.select(event.target);
+          const i = selected.attr('index');
+          
+          
+          const circleRadius = selected.attr('r');
+          selected.raise()
+          selected.transition().duration(200).attr('r', () => {
+            if (circleRadius > baseRadius) { return circleRadius}
+            else { return circleRadius * 2}
+          })
+
+
+          tooltip.raise();
+
+          tooltip.selectAll('rect').remove();
+
+          tooltip.selectAll('text').remove();
+
+
+          tooltip
+          .transition()
+          .duration(200)
+          .style('opacity', 0.9)
+          .attr('data-year', d.Year)
+          
+          tooltip.append('rect')
+            .attr('style', `outline: thin solid ${outlineColor}`)
+            .attr('fill', 'white')
+            .attr('height', '100px')
+            .attr('width', `${d.Doping ? '570' : '300'}`)
+            .attr('x', x + 15)
+            .attr('y', y - 20);
+
+          tooltip.append('text')
+          .text(`${d.Name} Skied in ${d.Year}`)
+          .attr('x', x + 25)
+          .attr('y', y );
+
+          tooltip.append('text')
+          .text(`Time: ${runnersTimeFormat(d.Time)} minutes`)
+          .attr('x', x + 25)
+          .attr('y', y + 25);
+
+          tooltip.append('text')
+          .text(`Allegations: ${d.Doping ? d.Doping : "None :)"}`)
+          
+          .attr('x', x + 25)
+          .attr('y', y + 45);
+        })
+        .on('mouseout', () => {
+          tooltip.transition().duration(200).style('opacity', 0)
+          d3.selectAll('circle').transition().duration(200).attr('r', baseRadius)
+          tooltip.lower();
+        
+          
+        })
+        
+        svg.on('mouseleave', () => {
+  tooltip.transition().duration(200).style('opacity', 0);
+});
+      }
+      if (document.readyState !== 'loading') {
+        formatData();
+      } else { document.addEventListener("DOMContentLoaded", () => formatData()) }
+    </script>
     <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
     <script src="https://kit.fontawesome.com/9f3c9f31d9.js" crossorigin="anonymous"></script>
   </body>
