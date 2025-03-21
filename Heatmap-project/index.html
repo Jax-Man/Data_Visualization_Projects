@@ -21,7 +21,7 @@
       function formatData() {
         
         //Setting min max to date for formatting and ease of use
-        const xFormatYear = d3.timeFormat('%Y')
+        
         const xArray = data.map((e) => {
           let date = new Date(1970, 0, 1, 0, 0, 0);
           date.setFullYear(e.Year);
