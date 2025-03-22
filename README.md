@@ -4,3 +4,5 @@
 ## [Bar Chart](https://jax-man.github.io/Data_Visualization_Projects/new-bar-chart)
 
 ## [scatterPlot-graph](https://jax-man.github.io/Data_Visualization_Projects/scatterplot-graph)
+
+## [HeatMap of Climate Change](https://jax-man.github.io/Data_Visualization_Projects/Heatmap-project/)
