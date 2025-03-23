@@ -1,96 +1,85 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-
-const data = await d3.csv('https://raw.githubusercontent.com/Jax-Man/fluffy-memory/refs/heads/main/csv-drug-store/climate_change.csv');
+import * as topojson from "https://cdn.jsdelivr.net/npm/topojson@3/+esm";
+const data = await d3.csv('');
 function formatData() {
   
   //Setting Up Color Array
-  
-  const colorArray = data.map(e => d3.interpolateLab('steelblue', 'red')(parseFloat(e.Temp)));
+  console.log(data)
+  const colorArray = '';
 
-  function mapLegend(array) {
-    const tempValues = data.map(e => parseFloat(e.Temp))
-    let tempArray = []
-  
-      for (let index = 0; index < array.length; index++) {
-        const element = array[index];
-        const breakPoint = d3.quantile(tempValues, element).toFixed(2);
-        tempArray.unshift(breakPoint);
-        
-      }
-    return tempArray
-  }
+  function mapLegend(array) {}
 
   const legendBreakPoints = [0, 0.25, 0.5, 0.75, 1]
-  const legendColors = mapLegend(legendBreakPoints);
+  const legendColors = '';
   // Set up xArray for axis
-  const xArray = data.map((e) => e.Year);
+  const xArray = '';
   //Set up yArray for axis
  
-  const yArray = ['January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'];
+  const yArray = [];
   
 
   // Declare the chart dimensions and margins.
   const width = 1000;
   const height = 500;
-  const dataWidth = width / 38;
+  const dataWidth = '';
   const marginTop = 80;
   const marginRight = 160;
   const marginBottom = 30;
   const marginLeft = 160;
   
   // Variable attributes
-  const dashArray = '10, 5';
-  const strokeWidth = '5';
- 
+  
 
-  console.log(data)
+  
 
  
 // Declare the x (horizontal position) scale.
-const xMin = new Date(d3.min(xArray));
-const xMax = new Date(d3.max(xArray));
-const xMinValue = xMin.getFullYear();
-const xMaxValue = xMax.getFullYear();
-xMin.setFullYear(xMinValue + 1);
-xMax.setFullYear(xMaxValue + 1);
-  const x = d3.scaleBand().range([marginLeft, width - marginRight])
-  .domain([...xArray]);
-  
-  
-  const xAxis = d3.axisBottom(x).tickValues(x.domain().filter((year) => year % 2 === 0));
-// Declare the y (vertical position) scale.
-  const y = d3.scaleBand().range([marginTop, height - marginBottom])
-          .domain(yArray);
 
-  const yAxis = d3.axisLeft(y);
+  const x = '';
+  
+  
+  const xAxis = '';
+// Declare the y (vertical position) scale.
+  const y = '';
+
+  const yAxis = '';
 
 // Create the SVG container.
   const svg = d3.select("#graph-wrapper").append("svg")
       .attr("width", width + marginLeft + marginRight)
       .attr("height", height + marginTop + marginBottom);
+
+//create US map
+  const path = d3.geoPath();
+
+  const g = svg.append('g')
+
+  const states = g.append("g")
+    .attr("fill", "#444")
+    .attr("cursor", "pointer")
+  .selectAll("path")
+  .data(topojson.feature(us, us.objects.states).features)
+  .join("path")
+    .on("click", clicked)
+    .attr("d", path);
+
+  states.append("title")
+   .text(d => d.properties.name);
+
+  g.append("path")
+  .attr("fill", "none")
+  .attr("stroke", "white")
+  .attr("stroke-linejoin", "round")
+  .attr("d", path(topojson.mesh(us, us.objects.states, (a, b) => a !== b)));
 //create legend on side
   const legend = svg
       .append('g')
       .attr('id', 'legend')
       .attr('transform', `translate(${50 + width - marginLeft}, ${height / 2})`)
       
-  const threshold = d3.scaleBand()
-      .domain(legendColors)
-      .range([0, 240]);
+  const threshold = '';
 
-    var xAxisLegend = d3.axisRight(threshold)
-      .tickSize(13);
+    var xAxisLegend = '';
   
   //Add Text, axis, and rectangles
 
@@ -102,12 +91,12 @@ xMax.setFullYear(xMaxValue + 1);
     .style('font-weight', '900')
 
   legend.selectAll("rect")
-      .data(legendColors)
+      .data()
       .enter().append("rect")
         .attr("height", 50)
-        .attr("y", (_, i) => threshold(legendColors[i]))
+        .attr("y", '')
         .attr("width", 20)
-        .attr("fill", (_, i) => d3.interpolateLab('steelblue', 'red')(legendColors[i]))
+        .attr("fill", '')
         .attr('style', 'outline: 2px solid black');
       
         
@@ -144,31 +133,26 @@ xMax.setFullYear(xMaxValue + 1);
   .append('rect')
   .style('stroke', 'black').style('stroke-dasharray', dashArray)
   .attr('class', 'cell')
-  .attr('x', (_, i) => x(xArray[i]))
-  .attr('y', (d) => y(yArray[d.Month - 1]))
+  .attr('x', '')
+  .attr('y', '')
   .attr('width', dataWidth)
-  .attr('height', (height - marginBottom - marginTop + 8) / 12)
-  .attr('fill', (_, i) => colorArray[i])
+  .attr('height', '')
+  .attr('fill', '')
   //.attr('style', outlineBase)
-  .attr('data-month', d => d.Month - 1)
-  .attr('data-year', d => d.Year)
-  .attr('data-temp', d => d.Temp)
-  .attr('index', (_, i) => i);
+  .attr('data-month', '')
+  .attr('data-year', '')
+  .attr('data-temp', '')
+  .attr('index', '');
 
   svg.selectAll('.cell').on('mouseover', (event, d) => {
     
     const [xTooltip, yTooltip] = d3.pointer(event);
     const selected = d3.select(event.target);
-    const month = yArray[selected.attr('data-month')];
-    const temp = parseFloat(selected.attr('data-temp')) + 0.5;
-    const tooltipOutline = d3.interpolateRgb('red', 'steelblue')(temp);
-    const boxColor = d3.interpolateRgb('white', selected.attr('fill'))(0.2)
+
     selected.raise()
-    console.log(tooltipOutline)
+    
     selected.transition().duration(200)
-      .style('stroke', 'black')
-      .style('stroke-dasharray', '')
-      .style('stroke-width', strokeWidth);
+      
 
     tooltip.raise();
 
@@ -180,32 +164,22 @@ xMax.setFullYear(xMaxValue + 1);
           .transition()
           .duration(200)
           .style('opacity', 0.9)
-          .attr('data-year', d.Year)
-          //make fill an interpolation of white and color of cell, make outline opposite color
-          tooltip.append('rect')
-            .attr('style', `outline: thin solid ${tooltipOutline}`)
-            .attr('fill', boxColor)
-            .attr('height', '60px')
-            .attr('width', '160')
-            .attr('x', xTooltip + 35)
-            .attr('y', yTooltip - 20);
+          
 
           tooltip.append('text')
-          .text(`${month} of ${selected.attr('data-year')}`)
+          .text(``)
           .attr('x', xTooltip + 45)
           .attr('y', yTooltip );
 
           tooltip.append('text')
-          .text(`Temp Diff: ${selected.attr('data-temp')} C°`)
+          .text(``)
           .attr('x', xTooltip + 45)
           .attr('y', yTooltip + 25);
   })
   .on('mouseout', () => {
     tooltip.transition().duration(200).style('opacity', 0)
-    d3.selectAll('.cell').transition().duration(200)
-      .style('stroke', 'black')
-      .style('stroke-dasharray', dashArray)
-      .style('stroke-width', '1')
+    d3.selectAll('').transition().duration(200)
+      
     tooltip.lower();
   
     
