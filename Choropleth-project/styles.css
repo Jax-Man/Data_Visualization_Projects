@@ -1,0 +1,30 @@
+html {
+  min-height: 100vh;
+}
+
+body, div#root {
+  height: 100vh;
+}
+
+div#root {
+  position: absolute;
+}
+
+div#x-axis-title {
+  transform: rotate(-90deg) translate(0, 25px);
+  
+}
+
+body {
+  background-color: burlywood;
+}
+
+div#graph-wrapper { 
+  background-color: white;
+  box-shadow: 5px 5px 15px black;
+}
+
+.transform {
+  transform: scale(2);
+  transition: transform 1s;
+}
