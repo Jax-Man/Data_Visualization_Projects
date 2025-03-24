@@ -54,7 +54,7 @@ function formatData() {
   const strokeWidth = '5';
  
 
-  console.log(data)
+  
 
  
 // Declare the x (horizontal position) scale.
