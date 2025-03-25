@@ -8,3 +8,5 @@
 ## [HeatMap of Climate Change](https://jax-man.github.io/Data_Visualization_Projects/Heatmap-project/)
 
 ## [Choropleth Map of US Higher Education compared to its County Population](https://jax-man.github.io/Data_Visualization_Projects/Choropleth-project/)
+
+## [Treemap of Most Succsesful Kickstarters by category](https://jax-man.github.io/Data_Visualization_Projects/treemap-diagram/)
