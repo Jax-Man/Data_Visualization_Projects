@@ -148,7 +148,7 @@ function formatData() {
 
     tooltip
       .transition()
-      .duration(50)
+      .duration(30)
       .style('opacity', 0.9)
       .attr('data-value', d.data.value)
       .style('left', `${xTooltip + 35}px`)
@@ -166,7 +166,7 @@ function formatData() {
       }
     )
     .on('mouseout', () => {
-    tooltip.transition().duration(100).style('opacity', 0)
+    tooltip.transition().duration(10).style('opacity', 0)
     d3.selectAll('.tile').transition().duration(200)
       
     tooltip.lower();
